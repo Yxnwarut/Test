@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <title>Uploader (Client Mockup) - Online</title>
+</head>
+<body>
+    <h2>ส่งรูปภาพขึ้นจอ (Online via Google Sheet)</h2>
+    <form id="uploadForm">
+        <label for="username">ชื่อ IG:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="message">ข้อความสั้นๆ:</label><br>
+        <input type="text" id="message" name="message"><br><br>
+
+        <label for="photoUrl">URL รูปภาพ (ทดสอบ):</label><br>
+        <input type="text" id="photoUrl" name="photoUrl" required placeholder="ใส่ URL รูปภาพที่อัปโหลดแล้ว"><br><br>
+
+        <button type="submit">ส่งขึ้นจอ</button>
+    </form>
+    <p id="statusMessage" style="color: green;"></p>
+
+    <script>
+        // *** แก้ไขตรงนี้: ใส่ Web App URL ของคุณ ***
+        const WEB_APP_URL = "URL ที่คุณคัดลอกมา"; 
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const dataToSend = {
+                username: document.getElementById('username').value,
+                message: document.getElementById('message').value,
+                photoUrl: document.getElementById('photoUrl').value 
+            };
+            const status = document.getElementById('statusMessage');
+            status.textContent = '...กำลังส่งข้อมูล...';
+
+            // ใช้ Fetch API เพื่อส่งข้อมูลไปยัง Apps Script (ผ่าน doPost)
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                // ส่งข้อมูลเป็น JSON
+                body: JSON.stringify(dataToSend), 
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.result === 'success') {
+                    status.textContent = `✅ ส่งรูปภาพเข้าระบบเรียบร้อย! ขอบคุณคุณ ${dataToSend.username}`;
+                    document.getElementById('uploadForm').reset();
+                } else {
+                    status.textContent = `❌ เกิดข้อผิดพลาด: ${result.message}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                status.textContent = '❌ การเชื่อมต่อผิดพลาด โปรดลองอีกครั้ง';
+            });
+        });
+    </script>
+</body>
+</html>
